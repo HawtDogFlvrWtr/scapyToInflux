@@ -22,8 +22,6 @@ def pushInfluxdb(q):
             for x in range(100):
                 body.append(q.get())
             bodyString = "\n".join(body)
-#            print bodyString
-#            q.task_done()
             try:
                 request = urllib2.Request(url, bodyString)
                 response = urllib2.urlopen(request)
@@ -48,27 +46,6 @@ def pkt_callback(packet):
     except:
         proto = "N/A"
 
-#    pattern = re.compile("(192.168.1.*)")
-#    # Resolve host if 192 address
-#    if pattern.match(packet[0][1].src): 
-#        try:
-#            shost = socket.gethostbyaddr(packet[0][1].src)
-#            shost = shost[0]
-#        except:
-#            shost = ""
-#    else:
-#        shost = ""
-#    # Resolve host if 192 address
-#    if pattern.match(packet[0][1].dst): 
-#        try:
-#            dhost = socket.gethostbyaddr(packet[0][1].dst)
-#            dhost = shost[0]
-#        except:
-#            dhost = ""
-#    else:
-#        dhost = ""
-    
-
     # Get port information
     try:
         sport = packet[0][2].sport
@@ -79,7 +56,6 @@ def pkt_callback(packet):
     
     # Block unneeded shit
     if dport != 8086 and sport != 8086 and dport != 22 and sport != 22 and dport != 563:
-#        data = 'traffic,src='+packet[0][1].src+',dst='+packet[0][1].dst+',shost='+shost+',dhost='+dhost+',proto='+str(proto)+',sport='+str(sport)+',dport='+str(dport)+' value='+str(packet[0][1].len)
         data = 'traffic,src='+packet[0][1].src+',dst='+packet[0][1].dst+',proto='+str(proto)+',sport='+str(sport)+',dport='+str(dport)+' value='+str(packet[0][1].len)+' '+str(timeCalc)+'000000000'
         q.put(data)   
         print "Queue: "+str(q.qsize()) +" Adding: "+data
@@ -89,7 +65,6 @@ for i in range(num_threads):
     worker.setDaemon(True)
     worker.start()
 
-#sniff(prn=pkt_callback, store=0)
 sniff(prn=pkt_callback, filter="ip", store=0)
 q.join()
 
